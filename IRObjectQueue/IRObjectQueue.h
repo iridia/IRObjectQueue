@@ -21,4 +21,6 @@
 
 - (void) removeAllObjects;
 
+@property (nonatomic, readwrite, assign) BOOL purgesAutomatically;	//	Default YES
+
 @end

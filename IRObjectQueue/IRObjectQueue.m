@@ -7,6 +7,11 @@
 //
 
 #import "IRObjectQueue.h"
+#import <TargetConditionals.h>
+
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+#endif
 
 
 @interface IRObjectQueue ()
@@ -18,6 +23,31 @@
 
 @implementation IRObjectQueue
 @synthesize identifierToObjects = _identifierToObjects;
+@synthesize purgesAutomatically = _purgesAutomatically;
+
+- (id) init {
+
+	self = [super init];
+	if (!self)
+		return nil;
+		
+	_purgesAutomatically = YES;
+	
+#if TARGET_OS_IPHONE
+
+	__weak IRObjectQueue *wSelf = self;
+
+	[[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+	
+		[wSelf handleMemoryWarning:note];
+		
+	}];
+
+#endif
+	
+	return self;
+
+}
 
 - (NSMutableDictionary *) identifierToObjects {
 
@@ -67,6 +97,13 @@
 	}
 	
 	return answer;
+
+}
+
+- (void) handleMemoryWarning:(NSNotification *)note {
+
+	if (self.purgesAutomatically)
+		[self removeAllObjects];
 
 }
 
